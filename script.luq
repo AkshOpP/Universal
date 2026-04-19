@@ -1,4 +1,4 @@
-q--// ULTRA HUB FINAL COMPLETE
+--// ULTRA HUB FINAL COMPLETE
 
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
