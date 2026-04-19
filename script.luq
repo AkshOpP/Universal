@@ -172,6 +172,93 @@ for i=1,3 do
 	button(tpPage,"TP "..i,function() if saved[i] then hrp().CFrame=saved[i] end end)
 end
 
+-- SPECTATE SYSTEM (TP TAB)
+
+local spectating = false
+local specList = {}
+local specIndex = 1
+
+local function updateSpec()
+	specList = {}
+	for _,p in pairs(Players:GetPlayers()) do
+		if p ~= player then
+			table.insert(specList, p)
+		end
+	end
+end
+
+local function applySpec()
+	local target = specList[specIndex]
+	if target and target.Character then
+		local hum = target.Character:FindFirstChild("Humanoid")
+		if hum then
+			workspace.CurrentCamera.CameraSubject = hum
+		end
+	end
+end
+
+local function getSpecInfo()
+	local target = specList[specIndex]
+	if not target or not target.Character then
+		return "None",0,0
+	end
+	
+	local hum = target.Character:FindFirstChild("Humanoid")
+	local root = target.Character:FindFirstChild("HumanoidRootPart")
+	local myRoot = hrp()
+	
+	local hp = hum and math.floor(hum.Health) or 0
+	local dist = 0
+	
+	if root and myRoot then
+		dist = math.floor((root.Position - myRoot.Position).Magnitude)
+	end
+	
+	return target.Name,hp,dist
+end
+
+-- Toggle
+button(tpPage,"Spectate",function()
+	spectating = not spectating
+	
+	if spectating then
+		updateSpec()
+		specIndex = 1
+		applySpec()
+	else
+		if player.Character then
+			workspace.CurrentCamera.CameraSubject = hum()
+		end
+	end
+end)
+
+-- Next →
+button(tpPage,"Next Player",function()
+	if not spectating then return end
+	specIndex += 1
+	if specIndex > #specList then specIndex = 1 end
+	applySpec()
+end)
+
+-- Previous ←
+button(tpPage,"Previous Player",function()
+	if not spectating then return end
+	specIndex -= 1
+	if specIndex < 1 then specIndex = #specList end
+	applySpec()
+end)
+
+-- INFO LOOP (prints in console, you can later link to label)
+task.spawn(function()
+	while true do
+		task.wait(0.5)
+		if spectating then
+			local name,hp,dist = getSpecInfo()
+			print("Watching:",name,"HP:",hp,"Dist:",dist)
+		end
+	end
+end)
+
 -- VISUAL
 button(visPage," ADVANCED ESP",function()
 	for _,p in pairs(Players:GetPlayers()) do
