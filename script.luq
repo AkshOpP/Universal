@@ -379,29 +379,33 @@ autofarmBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- INPUT RECORD
-UIS.InputBegan:Connect(function(input, gpe)
-	if gpe then return end
-	
-	if input.KeyCode == Enum.KeyCode.Space then
-		record("jump")
-	end
-	
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		record("click")
-	end
-	
-	local keyMap = {
-		[Enum.KeyCode.One]=1,[Enum.KeyCode.Two]=2,[Enum.KeyCode.Three]=3,
-		[Enum.KeyCode.Four]=4,[Enum.KeyCode.Five]=5,[Enum.KeyCode.Six]=6,
-		[Enum.KeyCode.Seven]=7,[Enum.KeyCode.Eight]=8,[Enum.KeyCode.Nine]=9
-	}
-	
-	if keyMap[input.KeyCode] then
-		record("slot", keyMap[input.KeyCode])
-	end
+-- BETTER INPUT DETECTION
+
+local mouse = player:GetMouse()
+
+-- CLICK DETECTION (reliable)
+mouse.Button1Down:Connect(function()
+	record("click")
 end)
 
+-- JUMP DETECTION (humanoid state)
+hum().Jumping:Connect(function()
+	record("jump")
+end)
+
+-- TOOL DETECTION (when equipping)
+player.CharacterAdded:Connect(function(char)
+	char.ChildAdded:Connect(function(child)
+		if child:IsA("Tool") then
+			local tools = player.Backpack:GetChildren()
+			for i,v in ipairs(tools) do
+				if v.Name == child.Name then
+					record("slot", i)
+				end
+			end
+		end
+	end)
+end)
 -- PLAYBACK
 task.spawn(function()
 	while true do
