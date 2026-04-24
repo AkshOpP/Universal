@@ -326,13 +326,17 @@ local recording = false
 local playing = false
 local actions = {}
 
+local lastTime = 0
+
 local function record(action, data)
 	if recording then
+		local now = tick()
 		table.insert(actions, {
-			time = tick(),
+			delay = now - lastTime,
 			action = action,
 			data = data
 		})
+		lastTime = now
 	end
 end
 
@@ -342,21 +346,21 @@ button(miscPage,"Record Action",function()
 	
 	if recording then
 		actions = {}
+		lastTime = tick()
 		print("Recording Started")
 	else
-		print("Recording Stopped")
+		print("Recording Stopped | Actions:", #actions)
 	end
 end)
 
--- RESET BUTTON
+-- RESET
 button(miscPage,"Reset AutoFarm",function()
 	actions = {}
-	print("Actions Cleared")
+	print("Cleared")
 end)
 
--- TOGGLE PLAY (AUTO FARM)
-local autofarmBtn
-autofarmBtn = Instance.new("TextButton", miscPage)
+-- TOGGLE PLAY
+local autofarmBtn = Instance.new("TextButton", miscPage)
 autofarmBtn.Size = UDim2.fromScale(1,0.13)
 autofarmBtn.Text = "Auto Farm OFF"
 autofarmBtn.BackgroundColor3 = Color3.fromRGB(120,0,0)
@@ -365,15 +369,17 @@ autofarmBtn.MouseButton1Click:Connect(function()
 	playing = not playing
 	
 	if playing then
+		print("Playback Started")
 		autofarmBtn.Text = "Auto Farm ON"
 		autofarmBtn.BackgroundColor3 = Color3.fromRGB(0,170,0)
 	else
+		print("Playback Stopped")
 		autofarmBtn.Text = "Auto Farm OFF"
 		autofarmBtn.BackgroundColor3 = Color3.fromRGB(120,0,0)
 	end
 end)
 
--- RECORD INPUTS
+-- INPUT RECORD
 UIS.InputBegan:Connect(function(input, gpe)
 	if gpe then return end
 	
@@ -385,41 +391,37 @@ UIS.InputBegan:Connect(function(input, gpe)
 		record("click")
 	end
 	
-	-- HOTBAR KEYS (1-9)
-	for i = 1,9 do
-		if input.KeyCode == Enum.KeyCode["One"] and i==1
-		or input.KeyCode == Enum.KeyCode["Two"] and i==2
-		or input.KeyCode == Enum.KeyCode["Three"] and i==3
-		or input.KeyCode == Enum.KeyCode["Four"] and i==4
-		or input.KeyCode == Enum.KeyCode["Five"] and i==5
-		or input.KeyCode == Enum.KeyCode["Six"] and i==6
-		or input.KeyCode == Enum.KeyCode["Seven"] and i==7
-		or input.KeyCode == Enum.KeyCode["Eight"] and i==8
-		or input.KeyCode == Enum.KeyCode["Nine"] and i==9 then
-			record("slot", i)
-		end
+	local keyMap = {
+		[Enum.KeyCode.One]=1,[Enum.KeyCode.Two]=2,[Enum.KeyCode.Three]=3,
+		[Enum.KeyCode.Four]=4,[Enum.KeyCode.Five]=5,[Enum.KeyCode.Six]=6,
+		[Enum.KeyCode.Seven]=7,[Enum.KeyCode.Eight]=8,[Enum.KeyCode.Nine]=9
+	}
+	
+	if keyMap[input.KeyCode] then
+		record("slot", keyMap[input.KeyCode])
 	end
 end)
 
--- PLAYBACK LOOP
+-- PLAYBACK
 task.spawn(function()
 	while true do
 		task.wait()
 		
 		if playing and #actions > 0 then
-			local startTime = actions[1].time
-			
 			for _,act in ipairs(actions) do
 				if not playing then break end
 				
-				local delayTime = act.time - startTime
-				task.wait(delayTime)
+				task.wait(act.delay)
 				
 				if act.action == "jump" then
 					hum():ChangeState(Enum.HumanoidStateType.Jumping)
 				
 				elseif act.action == "click" then
-					mouse1click()
+					-- TRY TOOL ACTIVATE INSTEAD (more reliable)
+					local tool = player.Character and player.Character:FindFirstChildOfClass("Tool")
+					if tool then
+						tool:Activate()
+					end
 				
 				elseif act.action == "slot" then
 					local tools = player.Backpack:GetChildren()
@@ -427,8 +429,6 @@ task.spawn(function()
 						player.Character.Humanoid:EquipTool(tools[act.data])
 					end
 				end
-				
-				startTime = act.time
 			end
 		end
 	end
