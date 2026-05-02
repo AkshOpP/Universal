@@ -7,6 +7,14 @@ local Lighting = game:GetService("Lighting")
 local TeleportService = game:GetService("TeleportService")
 
 local player = Players.LocalPlayer
+-- OBJECT CONTROL SYSTEM
+local selectedObject = nil
+local highlight = Instance.new("Highlight")
+highlight.FillColor = Color3.fromRGB(0,170,255)
+highlight.OutlineColor = Color3.fromRGB(0,85,255)
+
+local flyingObject = false
+local moveDir = Vector3.new()
 
 pcall(function()
 	player.PlayerGui:FindFirstChild("UltraHub"):Destroy()
@@ -120,6 +128,7 @@ local tpPage=createPage("TP")
 local visPage=createPage("Visual")
 local combatPage=createPage("Combat")
 local miscPage=createPage("Misc")
+local objectPage = createPage("Object")
 
 createTab("Player",playerPage)
 createTab("Move",movePage)
@@ -127,7 +136,8 @@ createTab("TP",tpPage)
 createTab("Visual",visPage)
 createTab("Combat",combatPage)
 createTab("Misc",miscPage)
-
+createTab("Object",objectPage)
+ 
 playerPage.Visible=true
 
 -- UTILS
@@ -159,6 +169,17 @@ button(movePage,"Infinite Jump",function() infJump=not infJump end)
 
 UIS.JumpRequest:Connect(function()
 	if infJump then hum():ChangeState(Enum.HumanoidStateType.Jumping) end
+end)
+UIS.InputBegan:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.W then moveDir = Vector3.new(0,0,-1) end
+	if input.KeyCode == Enum.KeyCode.S then moveDir = Vector3.new(0,0,1) end
+	if input.KeyCode == Enum.KeyCode.A then moveDir = Vector3.new(-1,0,0) end
+	if input.KeyCode == Enum.KeyCode.D then moveDir = Vector3.new(1,0,0) end
+	if input.KeyCode == Enum.KeyCode.Space then moveDir = Vector3.new(0,1,0) end
+end)
+
+UIS.InputEnded:Connect(function()
+	moveDir = Vector3.new()
 end)
 
 button(movePage,"Fly",function()
@@ -273,6 +294,8 @@ local aim=false
 button(combatPage,"Aim Assist",function() aim=not aim end)
 
 RS.RenderStepped:Connect(function()
+
+	-- AIM ASSIST
 	if aim then
 		local c,d=nil,9999
 		for _,p in pairs(Players:GetPlayers()) do
@@ -285,7 +308,23 @@ RS.RenderStepped:Connect(function()
 			workspace.CurrentCamera.CFrame=CFrame.new(workspace.CurrentCamera.CFrame.Position,c.Character.Head.Position)
 		end
 	end
+
+	-- 🔥 OBJECT FLY SYSTEM (ADD THIS)
+	if flyingObject and selectedObject then
+		local speed = 3
+		
+		if selectedObject:IsA("Model") then
+			if selectedObject.PrimaryPart then
+				selectedObject:PivotTo(selectedObject:GetPivot() + moveDir * speed)
+			end
+			
+		elseif selectedObject:IsA("BasePart") then
+			selectedObject.CFrame = selectedObject.CFrame + moveDir * speed
+		end
+	end
+
 end)
+
 
 local aura=false
 button(combatPage,"Kill Aura",function() aura=not aura end)
@@ -436,6 +475,38 @@ task.spawn(function()
 			end
 		end
 	end
+end)
+-- SELECT OBJECT
+button(objectPage,"Select Object",function()
+	local mouse = player:GetMouse()
+	mouse.Button1Down:Connect(function()
+		local target = mouse.Target
+		if target then
+			selectedObject = target
+			highlight.Parent = target
+		end
+	end)
+end)
+
+-- SELECT WHOLE OBJECT
+button(objectPage,"Select Whole Object",function()
+	if selectedObject then
+		local model = selectedObject:FindFirstAncestorOfClass("Model")
+		if model then
+			selectedObject = model
+			
+			if not model.PrimaryPart then
+				model.PrimaryPart = model:FindFirstChildWhichIsA("BasePart")
+			end
+			
+			highlight.Parent = model
+		end
+	end
+end)
+
+-- TOGGLE MOVE
+button(objectPage,"Move Object (Fly)",function()
+	flyingObject = not flyingObject
 end)
 
 -- Theme
