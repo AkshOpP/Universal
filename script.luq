@@ -1,5 +1,6 @@
 --// ULTRA HUB FINAL COMPLETE
 
+local moveDir = Vector3.new()
 print(moveDir)
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
@@ -313,11 +314,10 @@ RS.RenderStepped:Connect(function()
 
 	-- 🔥 OBJECT MOVE SYSTEM (FIXED)
 	if flyingObject and selectedObject then
-		local speed = 3
+		local speed = 10
 		
 		if selectedObject:IsA("Model") then
-	if selectedObject.PrimaryPart then
-		local cf = selectedObject:GetPivot()
+	    local cf = selectedObject:GetPivot()
 		selectedObject:PivotTo(cf + moveDir * speed)
 	end
 		elseif selectedObject:IsA("BasePart") then
@@ -559,11 +559,11 @@ fly.Position = UDim2.new(0.35,0,0.35,0)
 fly.Text = "↑"
 
 local function bind(btn, dir)
-	btn.MouseButton1Down:Connect(function()
+	btn.InputBegan:Connect(function()
 		moveDir = dir
 	end)
-	
-	btn.MouseButton1Up:Connect(function()
+
+	btn.InputEnded:Connect(function()
 		moveDir = Vector3.new()
 	end)
 end
