@@ -170,6 +170,7 @@ button(movePage,"Infinite Jump",function() infJump=not infJump end)
 UIS.JumpRequest:Connect(function()
 	if infJump then hum():ChangeState(Enum.HumanoidStateType.Jumping) end
 end)
+
 UIS.InputBegan:Connect(function(input)
 	if input.KeyCode == Enum.KeyCode.W then moveDir = Vector3.new(0,0,-1) end
 	if input.KeyCode == Enum.KeyCode.S then moveDir = Vector3.new(0,0,1) end
@@ -307,7 +308,10 @@ RS.RenderStepped:Connect(function()
 		if c then
 			workspace.CurrentCamera.CFrame=CFrame.new(workspace.CurrentCamera.CFrame.Position,c.Character.Head.Position)
 		end
-	end
+	end)
+
+   local cf = selectedObject:GetPivot()
+     selectedObject:PivotTo(cf + moveDir * speed)
 
 	-- 🔥 OBJECT FLY SYSTEM (ADD THIS)
 	if flyingObject and selectedObject then
@@ -505,9 +509,69 @@ button(objectPage,"Select Whole Object",function()
 end)
 
 -- TOGGLE MOVE
+local moveUI
+
 button(objectPage,"Move Object (Fly)",function()
 	flyingObject = not flyingObject
+	
+	if moveUI then
+		moveUI.Visible = flyingObject
+	end
 end)
+
+-- MOVE UI (JOYSTICK STYLE)
+moveUI = Instance.new("Frame", gui)
+moveUI.Size = UDim2.new(0,150,0,150)
+moveUI.Position = UDim2.new(1,-170,1,-170)
+moveUI.BackgroundColor3 = Color3.fromRGB(25,25,25)
+moveUI.Visible = false
+Instance.new("UICorner", moveUI)
+
+-- UP
+local up = Instance.new("TextButton", moveUI)
+up.Size = UDim2.new(0.3,0,0.3,0)
+up.Position = UDim2.new(0.35,0,0,0)
+up.Text = "W"
+
+-- DOWN
+local down = Instance.new("TextButton", moveUI)
+down.Size = UDim2.new(0.3,0,0.3,0)
+down.Position = UDim2.new(0.35,0,0.7,0)
+down.Text = "S"
+
+-- LEFT
+local left = Instance.new("TextButton", moveUI)
+left.Size = UDim2.new(0.3,0,0.3,0)
+left.Position = UDim2.new(0,0,0.35,0)
+left.Text = "A"
+
+-- RIGHT
+local right = Instance.new("TextButton", moveUI)
+right.Size = UDim2.new(0.3,0,0.3,0)
+right.Position = UDim2.new(0.7,0,0.35,0)
+right.Text = "D"
+
+-- UPWARD (FLY)
+local fly = Instance.new("TextButton", moveUI)
+fly.Size = UDim2.new(0.3,0,0.3,0)
+fly.Position = UDim2.new(0.35,0,0.35,0)
+fly.Text = "↑"
+
+local function bind(btn, dir)
+	btn.MouseButton1Down:Connect(function()
+		moveDir = dir
+	end)
+	
+	btn.MouseButton1Up:Connect(function()
+		moveDir = Vector3.new()
+	end)
+end
+
+bind(up, Vector3.new(0,0,-1))
+bind(down, Vector3.new(0,0,1))
+bind(left, Vector3.new(-1,0,0))
+bind(right, Vector3.new(1,0,0))
+bind(fly, Vector3.new(0,1,0))
 
 -- Theme
 local dark = true
