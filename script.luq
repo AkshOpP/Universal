@@ -308,27 +308,22 @@ RS.RenderStepped:Connect(function()
 		if c then
 			workspace.CurrentCamera.CFrame=CFrame.new(workspace.CurrentCamera.CFrame.Position,c.Character.Head.Position)
 		end
-	end)
+	end
 
-   local cf = selectedObject:GetPivot()
-     selectedObject:PivotTo(cf + moveDir * speed)
-
-	-- 🔥 OBJECT FLY SYSTEM (ADD THIS)
+	-- 🔥 OBJECT MOVE SYSTEM (FIXED)
 	if flyingObject and selectedObject then
 		local speed = 3
 		
 		if selectedObject:IsA("Model") then
 			if selectedObject.PrimaryPart then
-				selectedObject:PivotTo(selectedObject:GetPivot() + moveDir * speed)
-			end
+				
+		 end
 			
 		elseif selectedObject:IsA("BasePart") then
 			selectedObject.CFrame = selectedObject.CFrame + moveDir * speed
 		end
 	end
-
 end)
-
 
 local aura=false
 button(combatPage,"Kill Aura",function() aura=not aura end)
@@ -481,10 +476,22 @@ task.spawn(function()
 	end
 end)
 -- SELECT OBJECT
+local selecting = false
+
 button(objectPage,"Select Object",function()
-	local mouse = player:GetMouse()
-	mouse.Button1Down:Connect(function()
-		local target = mouse.Target
+	selecting = true
+end)
+
+player:GetMouse().Button1Down:Connect(function()
+	if selecting then
+		local target = player:GetMouse().Target
+		if target then
+			selectedObject = target
+			highlight.Parent = target
+			selecting = false
+		end
+	end
+end)
 		if target then
 			selectedObject = target
 			highlight.Parent = target
