@@ -1,5 +1,6 @@
 --// ULTRA HUB FINAL COMPLETE
 
+print(moveDir)
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local RS = game:GetService("RunService")
@@ -315,12 +316,12 @@ RS.RenderStepped:Connect(function()
 		local speed = 3
 		
 		if selectedObject:IsA("Model") then
-			if selectedObject.PrimaryPart then
-				
-		 end
-			
+	if selectedObject.PrimaryPart then
+		local cf = selectedObject:GetPivot()
+		selectedObject:PivotTo(cf + moveDir * speed)
+	end
 		elseif selectedObject:IsA("BasePart") then
-			selectedObject.CFrame = selectedObject.CFrame + moveDir * speed
+	      selectedObject.CFrame = selectedObject.CFrame + moveDir * speed
 		end
 	end
 end)
@@ -492,13 +493,7 @@ player:GetMouse().Button1Down:Connect(function()
 		end
 	end
 end)
-		if target then
-			selectedObject = target
-			highlight.Parent = target
-		end
-	end)
-end)
-
+		
 -- SELECT WHOLE OBJECT
 button(objectPage,"Select Whole Object",function()
 	if selectedObject then
@@ -516,8 +511,7 @@ button(objectPage,"Select Whole Object",function()
 end)
 
 -- TOGGLE MOVE
-local moveUI
-
+local m
 button(objectPage,"Move Object (Fly)",function()
 	flyingObject = not flyingObject
 	
