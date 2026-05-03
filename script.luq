@@ -319,7 +319,6 @@ RS.RenderStepped:Connect(function()
 		if selectedObject:IsA("Model") then
 	    local cf = selectedObject:GetPivot()
 		selectedObject:PivotTo(cf + moveDir * speed)
-	end
 		elseif selectedObject:IsA("BasePart") then
 	      selectedObject.CFrame = selectedObject.CFrame + moveDir * speed
 		end
