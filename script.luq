@@ -151,8 +151,110 @@ local function hrp()
 end
 
 -- PLAYER
-button(playerPage,"Speed",function() hum().WalkSpeed=50 end)
-button(playerPage,"Jump",function() hum().JumpPower=100 end)
+local speedValue = 16
+
+local speedFrame = Instance.new("Frame", playerPage)
+speedFrame.Size = UDim2.fromScale(1,0.13)
+
+local speedBtn = Instance.new("TextButton", speedFrame)
+speedBtn.Size = UDim2.new(0.35,0,1,0)
+speedBtn.Text = "Speed"
+
+local speedBox = Instance.new("TextLabel", speedFrame)
+speedBox.Size = UDim2.new(0.15,0,1,0)
+speedBox.Position = UDim2.new(0.85,0,0,0)
+speedBox.Text = tostring(speedValue)
+
+local speedSlider = Instance.new("TextButton", speedFrame)
+speedSlider.Size = UDim2.new(0.45,0,0.4,0)
+speedSlider.Position = UDim2.new(0.38,0,0.3,0)
+speedSlider.Text = ""
+
+local speedKnob = Instance.new("Frame", speedSlider)
+speedKnob.Size = UDim2.new(0,10,1,0)
+
+speedBtn.MouseButton1Click:Connect(function()
+	hum().WalkSpeed = speedValue
+end)
+
+speedSlider.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+
+		local move
+		move = UIS.InputChanged:Connect(function(i)
+			if i.UserInputType == Enum.UserInputType.MouseMovement
+			or i.UserInputType == Enum.UserInputType.Touch then
+
+				local pct = math.clamp(
+					(i.Position.X-speedSlider.AbsolutePosition.X)
+					/speedSlider.AbsoluteSize.X,
+					0,1
+				)
+
+				speedKnob.Position = UDim2.new(pct,-5,0,0)
+
+				speedValue = math.floor(16 + pct*184)
+				speedBox.Text = tostring(speedValue)
+			end
+		end)
+
+		UIS.InputEnded:Wait()
+		move:Disconnect()
+	end
+end)
+local jumpValue = 50
+
+local jumpFrame = Instance.new("Frame", playerPage)
+jumpFrame.Size = UDim2.fromScale(1,0.13)
+
+local jumpBtn = Instance.new("TextButton", jumpFrame)
+jumpBtn.Size = UDim2.new(0.35,0,1,0)
+jumpBtn.Text = "Jump"
+
+local jumpBox = Instance.new("TextLabel", jumpFrame)
+jumpBox.Size = UDim2.new(0.15,0,1,0)
+jumpBox.Position = UDim2.new(0.85,0,0,0)
+jumpBox.Text = tostring(jumpValue)
+
+local jumpSlider = Instance.new("TextButton", jumpFrame)
+jumpSlider.Size = UDim2.new(0.45,0,0.4,0)
+jumpSlider.Position = UDim2.new(0.38,0,0.3,0)
+jumpSlider.Text = ""
+
+local jumpKnob = Instance.new("Frame", jumpSlider)
+jumpKnob.Size = UDim2.new(0,10,1,0)
+
+jumpBtn.MouseButton1Click:Connect(function()
+	hum().JumpPower = jumpValue
+end)
+
+jumpSlider.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+
+		local move
+		move = UIS.InputChanged:Connect(function(i)
+			if i.UserInputType == Enum.UserInputType.MouseMovement
+			or i.UserInputType == Enum.UserInputType.Touch then
+
+				local pct = math.clamp(
+					(i.Position.X-jumpSlider.AbsolutePosition.X)
+					/jumpSlider.AbsoluteSize.X,
+					0,1
+				)
+
+				jumpKnob.Position = UDim2.new(pct,-5,0,0)
+
+				jumpValue = math.floor(50 + pct*250)
+				jumpBox.Text = tostring(jumpValue)
+			end
+		end)
+
+		UIS.InputEnded:Wait()
+		move:Disconnect()
+	end
+end)
 
 local noclip=false
 button(playerPage,"Noclip",function() noclip=not noclip end)
@@ -288,6 +390,33 @@ button(visPage," ADVANCED ESP",function()
 	for _,p in pairs(Players:GetPlayers()) do
 		if p~=player and p.Character then
 			local h=Instance.new("Highlight",p.Character)
+		end
+	end
+end)
+button(visPage,"Potato Mode",function()
+	for _,v in pairs(workspace:GetDescendants()) do
+		if v:IsA("BasePart") then
+			v.Material = Enum.Material.Plastic
+			v.Reflectance = 0
+		elseif v:IsA("Decal") or v:IsA("Texture") then
+			v.Transparency = 1
+		elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+			v.Enabled = false
+		end
+	end
+
+	Lighting.GlobalShadows = false
+	Lighting.FogEnd = 100000
+	settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+end)
+
+button(visPage,"Low Graphics",function()
+	Lighting.GlobalShadows = false
+	Lighting.Brightness = 1
+
+	for _,v in pairs(workspace:GetDescendants()) do
+		if v:IsA("ParticleEmitter") or v:IsA("Trail") then
+			v.Enabled = false
 		end
 	end
 end)
