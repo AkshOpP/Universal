@@ -196,6 +196,9 @@ speedSlider.InputBegan:Connect(function(input)
 
 				speedValue = math.floor(16 + pct*184)
 				speedBox.Text = tostring(speedValue)
+               local h = hum()
+               if h then
+              h.WalkSpeed = speedValue
 			end
 		end)
 
@@ -248,11 +251,27 @@ jumpSlider.InputBegan:Connect(function(input)
 
 				jumpValue = math.floor(50 + pct*250)
 				jumpBox.Text = tostring(jumpValue)
+                local h = hum()
+               if h then
+               h.UseJumpPower = true
+               h.JumpPower = jumpValue
 			end
 		end)
 
 		UIS.InputEnded:Wait()
 		move:Disconnect()
+	end
+end)
+RS.RenderStepped:Connect(function()
+	local h = hum()
+	if h then
+		if h.WalkSpeed ~= speedValue then
+			h.WalkSpeed = speedValue
+		end
+
+		if h.JumpPower ~= jumpValue then
+			h.JumpPower = jumpValue
+		end
 	end
 end)
 
