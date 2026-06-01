@@ -195,17 +195,20 @@ speedSlider.InputBegan:Connect(function(input)
 				speedKnob.Position = UDim2.new(pct,-5,0,0)
 
 				speedValue = math.floor(16 + pct*184)
-				speedBox.Text = tostring(speedValue)
+				speedBox.Text = tostring(speedValue) 
+
                local h = hum()
                if h then
               h.WalkSpeed = speedValue
 			end
+          end
 		end)
 
 		UIS.InputEnded:Wait()
 		move:Disconnect()
 	end
 end)
+
 local jumpValue = 50
 
 local jumpFrame = Instance.new("Frame", playerPage)
@@ -244,34 +247,24 @@ jumpSlider.InputBegan:Connect(function(input)
 				local pct = math.clamp(
 					(i.Position.X-jumpSlider.AbsolutePosition.X)
 					/jumpSlider.AbsoluteSize.X,
-					0,1
-				)
-
-				jumpKnob.Position = UDim2.new(pct,-5,0,0)
+					0,1 
+                    )
+			     
+                 jumpKnob.Position = UDim2.new(pct,-5,0,0)
 
 				jumpValue = math.floor(50 + pct*250)
 				jumpBox.Text = tostring(jumpValue)
+
                 local h = hum()
-               if h then
+                if h then
                h.UseJumpPower = true
                h.JumpPower = jumpValue
 			end
+          end
 		end)
 
 		UIS.InputEnded:Wait()
 		move:Disconnect()
-	end
-end)
-RS.RenderStepped:Connect(function()
-	local h = hum()
-	if h then
-		if h.WalkSpeed ~= speedValue then
-			h.WalkSpeed = speedValue
-		end
-
-		if h.JumpPower ~= jumpValue then
-			h.JumpPower = jumpValue
-		end
 	end
 end)
 
