@@ -272,17 +272,17 @@ local regenEnabled = false
 
 local regenBtn = Instance.new("TextButton", playerPage)
 regenBtn.Size = UDim2.fromScale(1,0.13)
-regenBtn.Text = "Health Regen OFF"
+regenBtn.Text = "GodMode OFF"
 regenBtn.BackgroundColor3 = Color3.fromRGB(255,0,0)
 
 regenBtn.MouseButton1Click:Connect(function()
 	regenEnabled = not regenEnabled
 
 	if regenEnabled then
-		regenBtn.Text = "Health Regen ON"
+		regenBtn.Text = "GodMode ON"
 		regenBtn.BackgroundColor3 = Color3.fromRGB(0,255,0)
 	else
-		regenBtn.Text = "Health Regen OFF"
+		regenBtn.Text = "GodMode OFF"
 		regenBtn.BackgroundColor3 = Color3.fromRGB(255,0,0)
 	end
 end)
@@ -291,18 +291,7 @@ local lastHealth = hum().Health
 
 hum().HealthChanged:Connect(function(newHealth)
 	if regenEnabled and newHealth < lastHealth then
-
-		task.delay(2,function()
-
-			local h = hum()
-
-			while regenEnabled and h.Health < h.MaxHealth do
-				h.Health = math.min(h.Health + 2,h.MaxHealth)
-				task.wait(0.1)
-			end
-
-		end)
-
+		hum().Health = hum().MaxHealth
 	end
 
 	lastHealth = newHealth
