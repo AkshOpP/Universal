@@ -289,9 +289,22 @@ end)
 
 local lastHealth = hum().Health
 
+local regenRunning = false
+
 hum().HealthChanged:Connect(function(newHealth)
-	if regenEnabled and newHealth < lastHealth then
-		hum().Health = hum().MaxHealth
+	if regenEnabled and newHealth < lastHealth and not regenRunning then
+		regenRunning = true
+
+		task.delay(1.5,function()
+			local h = hum()
+
+			while regenEnabled and h and h.Health > 0 and h.Health < h.MaxHealth do
+				h.Health = math.min(h.Health + 25,h.MaxHealth)
+				task.wait(0.05)
+			end
+
+			regenRunning = false
+		end)
 	end
 
 	lastHealth = newHealth
